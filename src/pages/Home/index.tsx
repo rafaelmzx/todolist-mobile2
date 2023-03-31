@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import axios from 'axios'
 
 import { SafeAreaView, View, Button, TextInput, Text, TouchableOpacity } from "react-native";
 
@@ -13,6 +14,8 @@ import { BsCardChecklist } from 'react-icons/Bs'
 export default function Home() {
   const [todos, setTodos] = useState<TodoItemProps[]>([]);
   const [showCompleted, setShowCompleted] = useState(false);
+  
+  const [name, setName] = useState("");
 
   const [newTodoTitle, setNewTodoTitle] = useState("");
 
@@ -22,13 +25,13 @@ export default function Home() {
     if (trimmedTitle.length == 0) return;
 
     const existingTodo = todos.find((todo) => {
-      return todo.title === trimmedTitle;
+      return todo.name === trimmedTitle;
     });
 
     if (existingTodo) return;
 
     const newTodo: TodoItemProps = {
-      title: trimmedTitle,
+      name: trimmedTitle,
       completed: false,
       onPress: function (): void {
         throw new Error("Função não encontrada");
@@ -37,18 +40,37 @@ export default function Home() {
     };
     setTodos([...todos, newTodo]);
     setNewTodoTitle("");
-  };
 
+    axios.post('http://192.168.30.230:3333/task/create', {
+      name: trimmedTitle
+    })
+    .then((response) => {
+      // A resposta da requisição POST contém a tarefa recém criada com seu respectivo ID
+      const createdTodo: TodoItemProps = response.data;
+
+      setTodos([...todos, createdTodo]);
+      setNewTodoTitle('');
+    })
+    .catch((error) => {
+      console.error(error);
+    });
+};
+  
   const handleCompletedPress = (index: number) => {
     const updatedTodos = [...todos];
     updatedTodos[index].completed = !updatedTodos[index].completed;
     setTodos(updatedTodos);
   };
 
-  const handleDeletePress = (index: number) => {
+  const handleDeletePress = async (index: number) => {
+    console.log(`index:${index}`)
+
     const updatedTodos = [...todos];
     updatedTodos.splice(index, 1);
     setTodos(updatedTodos);
+
+
+    await axios.delete(`http://192.168.30.230:3333/task/${index}`)
   };
 
   function countTasks(tasks: TodoItemProps[]) {
@@ -60,6 +82,13 @@ export default function Home() {
 
   const { numTotalTasks, numCompletedTasks, numIncompleteTasks } =
     countTasks(todos);
+    
+
+  async function getAll(){
+    const result: any = await axios.get('http://192.168.30.230:3333/task/')
+    
+    setTodos(result.data)
+  }
 
   return (
     <SafeAreaView style={homeStyles.container}>
@@ -83,6 +112,7 @@ export default function Home() {
         </View>
         <View>
         <TodoList
+        //@ts-ignore
           todos={todos}
           onCompletedPress={handleCompletedPress}
           onDeletePress={handleDeletePress}
@@ -90,6 +120,8 @@ export default function Home() {
         />
 
         </View>
+
+        <TouchableOpacity onPress={getAll} style={{backgroundColor: '#fff'}}><Text>Atualizar</Text></TouchableOpacity>
         <View >
           <Button
             title={showCompleted ? "Mostrar pendentes" : "Mostrar concluídas"}

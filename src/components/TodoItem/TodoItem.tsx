@@ -4,17 +4,17 @@ import { Text, TouchableOpacity, View } from 'react-native';
 import { todoItemStyles } from './style';
 
 export interface TodoItemProps {
-  title: string;
+  name: string;
   completed: boolean;
   onPress: () => void;
   onDeletePress: any
 }
 
-const TodoItem: React.FC<TodoItemProps> = ({ title, completed, onPress }) => {
+const TodoItem: React.FC<TodoItemProps> = ({ name, completed, onPress }) => {
     return (
       <View style={todoItemStyles.container}>
         <TouchableOpacity onPress={onPress}>
-          <Text style={completed ? todoItemStyles.completedTitle : todoItemStyles.title}>{title}</Text>
+          <Text style={completed ? todoItemStyles.completedTitle : todoItemStyles.title}>{name}</Text>
         </TouchableOpacity>
       </View>
     );

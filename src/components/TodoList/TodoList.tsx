@@ -5,9 +5,10 @@ import TodoItem from '../TodoItem/TodoItem';
 import { todoStyles } from './style';
 
 interface TodoItemProps {
-    title: string;
+    name: string;
     completed: boolean;
     onPress: () => void;
+    id: number
 }
 
 interface TodoListProps {
@@ -24,9 +25,9 @@ const TodoList: React.FC<TodoListProps> = ({ todos, onCompletedPress, onDeletePr
 
   const renderItem = ({ item, index }: { item: TodoItemProps; index: number }) => (
     <TodoItem
-      title={item.title}
+      name={item.name}
       completed={item.completed}
-      onPress={() => onCompletedPress(index)}
+      onPress={() => onDeletePress(item.id)}
       onDeletePress={() => onDeletePress(index)}
     />
   );
@@ -38,7 +39,6 @@ const TodoList: React.FC<TodoListProps> = ({ todos, onCompletedPress, onDeletePr
         renderItem={renderItem}
         keyExtractor={(item, index) => `${index}`}
       />
-
     </View>
   );
 };
